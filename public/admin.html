@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gameify Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0c0c10;
+      --surface: #13131a;
+      --surface2:#1b1b26;
+      --border:  rgba(255,255,255,0.07);
+      --accent:  #e8ff47;
+      --red:     #ff5c5c;
+      --green:   #5cffa1;
+      --text:    #e8e8f0;
+      --muted:   #6b6b82;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+
+    /* ── Login ── */
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .login-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 380px; }
+    .login-card h1 { font-size: 1.8rem; font-weight: 900; letter-spacing: 2px; color: var(--accent); margin-bottom: 4px; }
+    .login-card p  { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .field label { font-size: 0.72rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+    .field input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.92rem; padding: 11px 14px; outline: none; font-family: inherit; transition: border-color 0.2s; }
+    .field input:focus { border-color: var(--accent); }
+
+    .btn { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; width: 100%; }
+    .btn-primary { background: var(--accent); color: #0c0c10; }
+    .btn-primary:hover { background: #f5ff80; }
+    .btn-danger  { background: rgba(255,92,92,0.12); color: var(--red); border: 1px solid rgba(255,92,92,0.2); width: auto; padding: 6px 14px; font-size: 0.8rem; }
+    .btn-danger:hover { background: rgba(255,92,92,0.25); }
+    .btn-sm { width: auto; padding: 6px 14px; font-size: 0.8rem; }
+
+    .error { background: rgba(255,92,92,0.1); border: 1px solid rgba(255,92,92,0.3); color: var(--red); padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 16px; display: none; }
+    .error.show { display: block; }
+
+    /* ── Dashboard ── */
+    .dashboard { max-width: 1000px; margin: 0 auto; padding: 40px 24px; }
+
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    header h1 { font-size: 2rem; font-weight: 900; letter-spacing: 2px; color: var(--accent); }
+    header p  { color: var(--muted); font-size: 0.82rem; margin-top: 2px; }
+
+    .stats { display: flex; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 28px; }
+    .stat-card .num { font-size: 2rem; font-weight: 900; color: var(--text); }
+    .stat-card .lbl { font-size: 0.7rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+    .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .panel-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-header h2 { font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 24px; text-align: left; }
+    th { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+    tr:not(:last-child) td { border-bottom: 1px solid var(--border); }
+    tr:hover td { background: var(--surface2); }
+    td { font-size: 0.88rem; }
+
+    .badge { display: inline-flex; align-items: center; justify-content: center; background: rgba(232,255,71,0.1); color: var(--accent); border: 1px solid rgba(232,255,71,0.2); border-radius: 99px; padding: 2px 10px; font-size: 0.75rem; font-weight: 700; }
+
+    .date { color: var(--muted); font-size: 0.82rem; }
+
+    .hidden { display: none !important; }
+
+    /* Toast */
+    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.5); transform: translateY(20px); opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; }
+    #toast.show    { transform: translateY(0); opacity: 1; }
+    #toast.success { border-left: 3px solid var(--green); }
+    #toast.error   { border-left: 3px solid var(--red); }
+
+    .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 40px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="login-page">
+    <div class="login-wrap">
+      <div class="login-card">
+        <h1>GAMEIFY</h1>
+        <p>Admin Dashboard — Enter your password to continue</p>
+        <div id="login-error" class="error"></div>
+        <div class="field">
+          <label>Admin Password</label>
+          <input id="admin-password" type="password" placeholder="Enter admin password">
+        </div>
+        <button class="btn btn-primary" onclick="adminLogin()">Enter Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="hidden">
+    <div class="dashboard">
+
+      <header>
+        <div>
+          <h1>GAMEIFY ADMIN</h1>
+          <p>User Management Dashboard</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn btn-sm btn-danger" onclick="adminLogout()">Sign Out</button>
+        </div>
+      </header>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="num" id="total-users">—</div>
+          <div class="lbl">Total Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="num" id="total-games">—</div>
+          <div class="lbl">Total Games</div>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>All Users</h2>
+          <button class="btn btn-sm btn-primary" style="width:auto;padding:7px 16px;font-size:0.8rem" onclick="loadUsers()">↻ Refresh</button>
+        </div>
+        <div id="table-wrap">
+          <div class="spinner"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    let adminPass = '';
+
+    // ── Login ────────────────────────────────────────────────────────────
+    function adminLogin() {
+      const pw = document.getElementById('admin-password').value.trim();
+      if (!pw) return showLoginError('Please enter the admin password.');
+      adminPass = pw;
+      showDashboard();
+    }
+
+    function adminLogout() {
+      adminPass = '';
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('login-page').classList.remove('hidden');
+      document.getElementById('admin-password').value = '';
+    }
+
+    function showLoginError(msg) {
+      const el = document.getElementById('login-error');
+      el.textContent = msg;
+      el.classList.add('show');
+    }
+
+    document.getElementById('admin-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') adminLogin();
+    });
+
+    // ── Dashboard ────────────────────────────────────────────────────────
+    function showDashboard() {
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+      loadUsers();
+    }
+
+    async function loadUsers() {
+      document.getElementById('table-wrap').innerHTML = '<div class="spinner"></div>';
+      try {
+        const r = await fetch(`/api/admin/users?password=${encodeURIComponent(adminPass)}`);
+        if (r.status === 401) {
+          adminLogout();
+          showLoginError('Wrong password.');
+          return;
+        }
+        const users = await r.json();
+        renderTable(users);
+      } catch (e) {
+        document.getElementById('table-wrap').innerHTML = `<p style="padding:24px;color:var(--red)">${e.message}</p>`;
+      }
+    }
+
+    function renderTable(users) {
+      const totalGames = users.reduce((sum, u) => sum + parseInt(u.game_count || 0), 0);
+      document.getElementById('total-users').textContent = users.length;
+      document.getElementById('total-games').textContent = totalGames;
+
+      if (!users.length) {
+        document.getElementById('table-wrap').innerHTML = '<p style="padding:32px;text-align:center;color:var(--muted)">No users yet.</p>';
+        return;
+      }
+
+      document.getElementById('table-wrap').innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Games</th>
+              <th>Joined</th>
+              <th>ID</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map(u => `
+              <tr>
+                <td><strong>${esc(u.username)}</strong></td>
+                <td><span class="badge">${u.game_count || 0}</span></td>
+                <td class="date">${new Date(u.created_at).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' })}</td>
+                <td class="date" style="font-family:monospace;font-size:0.75rem">${esc(u.id.slice(0,8))}…</td>
+                <td>
+                  <button class="btn btn-danger" onclick="deleteUser('${esc(u.id)}', '${esc(u.username)}')">Delete</button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function deleteUser(userId, username) {
+      if (!confirm(`Delete user "${username}" and all their games? This cannot be undone.`)) return;
+      try {
+        const r = await fetch('/api/admin/deleteuser', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: adminPass, userId })
+        });
+        if (!r.ok) { const d = await r.json(); throw new Error(d.error); }
+        toast(`User "${username}" deleted.`);
+        loadUsers();
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    function toast(msg, type = 'success') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className   = `show ${type}`;
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.className = ''; }, 2800);
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>
