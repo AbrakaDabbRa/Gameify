@@ -1,7 +1,4 @@
-/**
- * auth.js
- * Password hashing, tokens, cookies.
- */
+/** Password hashing */
 
 const crypto = require('crypto');
 const SECRET = process.env.JWT_SECRET || 'gameify-secret-change-in-production';
