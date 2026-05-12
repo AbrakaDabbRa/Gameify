@@ -1,7 +1,6 @@
 /**
  * database.js
  * PostgreSQL database — stores both users and games.
- * Uses the 'pg' package (npm install pg)
  */
 
 const { Pool } = require('pg');
@@ -11,7 +10,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
-// ── Create tables on startup ───────────────────────────────────────────────
+// ── Create tables on startup 
 async function init() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS users (
@@ -39,7 +38,7 @@ async function init() {
   console.log('  ✅  Database tables ready');
 }
 
-// ── User queries ───────────────────────────────────────────────────────────
+// ── User queries 
 async function getUserById(id) {
   const r = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
   return r.rows[0] || null;
@@ -74,7 +73,7 @@ async function deleteUser(id) {
   await pool.query(`DELETE FROM users WHERE id = $1`, [id]);
 }
 
-// ── Game queries ───────────────────────────────────────────────────────────
+// ── Game queries
 async function getGamesByUser(userId) {
   const r = await pool.query(
     `SELECT * FROM games WHERE user_id = $1 ORDER BY added_at DESC`,
