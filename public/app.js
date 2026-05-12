@@ -2,7 +2,6 @@
  * app.js — Gameify frontend
  */
 
-// ── State ──────────────────────────────────────────────────────────────────
 const state = {
   games:      [],
   filter:     'All',
@@ -12,9 +11,6 @@ const state = {
   user:       null,
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
-// BOOT
-// ══════════════════════════════════════════════════════════════════════════════
 async function boot() {
   try {
     const r = await fetch('/auth/me');
@@ -29,9 +25,6 @@ async function boot() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// PAGE SWITCHING
-// ══════════════════════════════════════════════════════════════════════════════
 function showAuth() {
   document.getElementById('auth-page').classList.remove('hidden');
   document.getElementById('main-app').classList.add('hidden');
@@ -46,9 +39,6 @@ function showApp() {
   loadGames();
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// AUTH
-// ══════════════════════════════════════════════════════════════════════════════
 function switchTab(tab) {
   document.querySelectorAll('.auth-tab').forEach((btn, i) => {
     btn.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
@@ -113,9 +103,6 @@ async function logout() {
   showAuth();
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
-// GAMES — LOAD & RENDER
-// ══════════════════════════════════════════════════════════════════════════════
 async function loadGames() {
   try {
     state.games = await api('/api/games');
@@ -134,7 +121,6 @@ function render() {
     return mf && ms;
   });
 
-  // Stats
   document.getElementById('stat-total').textContent   = state.games.length;
   document.getElementById('stat-playing').textContent = state.games.filter(g => g.status === 'Playing').length;
   document.getElementById('stat-backlog').textContent = state.games.filter(g => g.status === 'Backlog').length;
@@ -171,10 +157,7 @@ function render() {
       </div>`;
   }).join('');
 }
-
-// ══════════════════════════════════════════════════════════════════════════════
 // GAMES — CRUD
-// ══════════════════════════════════════════════════════════════════════════════
 
 // CREATE
 async function addGame() {
@@ -250,9 +233,7 @@ async function saveEdit() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 // FILTER & SEARCH
-// ══════════════════════════════════════════════════════════════════════════════
 function setFilter(f, btn) {
   state.filter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -265,9 +246,7 @@ function onSearch(value) {
   render();
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 // STARS
-// ══════════════════════════════════════════════════════════════════════════════
 function initStars(containerId, onSet) {
   document.getElementById(containerId).querySelectorAll('.star').forEach(s => {
     s.addEventListener('click',      () => { const v = +s.dataset.v; onSet(v); renderStars(containerId, v); });
@@ -281,9 +260,7 @@ function renderStars(containerId, value) {
     .forEach(s => s.classList.toggle('filled', +s.dataset.v <= value));
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
 // KEYBOARD SHORTCUTS
-// ══════════════════════════════════════════════════════════════════════════════
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
   if (e.key === 'Enter' && !document.getElementById('auth-page').classList.contains('hidden')) {
@@ -295,9 +272,7 @@ document.getElementById('f-title').addEventListener('keydown', e => {
   if (e.key === 'Enter') addGame();
 });
 
-// ══════════════════════════════════════════════════════════════════════════════
 // HELPERS
-// ══════════════════════════════════════════════════════════════════════════════
 async function api(url, method = 'GET', body = null) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
   if (body) opts.body = JSON.stringify(body);
@@ -325,5 +300,4 @@ function esc(s) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 }
 
-// ── Start ──────────────────────────────────────────────────────────────────
 boot();
