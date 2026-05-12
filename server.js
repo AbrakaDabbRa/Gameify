@@ -19,7 +19,6 @@ const PORT           = process.env.PORT || 3000;
 const PUBLIC_DIR     = path.join(__dirname, 'public');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'gamify123';
 
-// ── MIME types ─────────────────────────────────────────────────────────────
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css':  'text/css',
@@ -29,7 +28,6 @@ const MIME = {
   '.svg':  'image/svg+xml',
 };
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -68,7 +66,7 @@ function serveStatic(res, pathname) {
   });
 }
 
-// ── Format game row ────────────────────────────────────────────────────────
+// ── Format game row 
 function formatGame(row) {
   return {
     id:        row.id,
@@ -82,7 +80,7 @@ function formatGame(row) {
   };
 }
 
-// ── Start server after DB is ready ─────────────────────────────────────────
+// ── Start server after DB is ready
 db.init().then(() => {
 
   http.createServer(async (req, res) => {
@@ -96,7 +94,7 @@ db.init().then(() => {
 
     try {
 
-      // ── POST /auth/register ────────────────────────────────────────────
+      // ── POST /auth/register
       if (pathname === '/auth/register' && method === 'POST') {
         const { username, password } = await parseBody(req);
         if (!username || !password)               return json(res, 400, { error: 'Username and password required' });
@@ -109,7 +107,7 @@ db.init().then(() => {
         return json(res, 201, { user: { id: user.id, username: user.username } }, { 'Set-Cookie': auth.setCookie(token) });
       }
 
-      // ── POST /auth/login ───────────────────────────────────────────────
+      // ── POST /auth/login 
       if (pathname === '/auth/login' && method === 'POST') {
         const { username, password } = await parseBody(req);
         if (!username || !password) return json(res, 400, { error: 'Username and password required' });
@@ -122,12 +120,12 @@ db.init().then(() => {
         return json(res, 200, { user: { id: user.id, username: user.username } }, { 'Set-Cookie': auth.setCookie(token) });
       }
 
-      // ── POST /auth/logout ──────────────────────────────────────────────
+      // ── POST /auth/logout 
       if (pathname === '/auth/logout' && method === 'POST') {
         return json(res, 200, { ok: true }, { 'Set-Cookie': auth.clearCookie() });
       }
 
-      // ── GET /auth/me ───────────────────────────────────────────────────
+      // ── GET /auth/me 
       if (pathname === '/auth/me' && method === 'GET') {
         const payload = auth.getAuthUser(req);
         if (!payload) return json(res, 401, { error: 'Not logged in' });
@@ -136,7 +134,7 @@ db.init().then(() => {
         return json(res, 200, { id: user.id, username: user.username });
       }
 
-      // ── GET /api/admin/users ───────────────────────────────────────────
+      // ── GET /api/admin/users
       if (pathname === '/api/admin/users' && method === 'GET') {
         const params   = new URL(req.url, 'http://localhost').searchParams;
         const password = params.get('password');
@@ -145,7 +143,7 @@ db.init().then(() => {
         return json(res, 200, users);
       }
 
-      // ── POST /api/admin/deleteuser ─────────────────────────────────────
+      // ── POST /api/admin/deleteuser 
       if (pathname === '/api/admin/deleteuser' && method === 'POST') {
         const { password, userId } = await parseBody(req);
         if (password !== ADMIN_PASSWORD) return json(res, 401, { error: 'Invalid admin password' });
@@ -154,7 +152,7 @@ db.init().then(() => {
         return json(res, 200, { ok: true });
       }
 
-      // ── Games API (/api/games) ─────────────────────────────────────────
+      // ── Games API (/api/games)
       if (pathname.startsWith('/api/games')) {
         const payload = auth.getAuthUser(req);
         if (!payload) return json(res, 401, { error: 'Please log in' });
@@ -203,7 +201,7 @@ db.init().then(() => {
         return json(res, 405, { error: 'Method not allowed' });
       }
 
-      // ── Static files ───────────────────────────────────────────────────
+      // ── Static files
       serveStatic(res, pathname);
 
     } catch (e) {
@@ -212,9 +210,9 @@ db.init().then(() => {
     }
 
   }).listen(PORT, () => {
-    console.log(`\n  🎮  GAMEIFY     →  http://localhost:${PORT}`);
-    console.log(`  🗄️   Database    →  PostgreSQL (Render)`);
-    console.log(`  📁  Static      →  /public\n`);
+    console.log(`\n   GAMEIFY     →  http://localhost:${PORT}`);
+    console.log(`    Database    →  PostgreSQL (Render)`);
+    console.log(`   Static      →  /public\n`);
   });
 
 }).catch(err => {
